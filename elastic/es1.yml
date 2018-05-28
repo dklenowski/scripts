@@ -1,0 +1,14 @@
+cluster.name: es
+node.name: 1
+node.master: true
+node.data: false
+
+# performance stuff
+index.number_of_shards: 3     # cannot change
+index.number_of_replicas: 2
+
+path.data: /opt/elasticsearch-1.2.1/data/1
+path.logs: /opt/elasticsearch-1.2.1/logs/1
+
+network.host: 0.0.0.0
+discovery.zen.ping.multicast.enabled: false
