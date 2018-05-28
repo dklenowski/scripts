@@ -1,0 +1,21 @@
+SET SESSION SQL_MODE = 'ANSI,TRADITIONAL,ANSI_QUOTES';
+SELECT @@global.hostname AS "HOSTNAME"
+     , @@global.port AS "PORT"
+     , TABLE_SCHEMA AS "SCHEMA"
+     , ENGINE AS "ENGINE"
+     , VERSION() AS "MySQL VERSION"
+     , COUNT(*) AS "TABLE COUNT"
+     , CASE 
+           WHEN SUM(DATA_LENGTH)>=1024*1024*1024 THEN LPAD( CONCAT( ROUND( SUM(DATA_LENGTH)/1024/1024/1024, 2 ), ' GB' ), 10, SPACE(1) )
+           WHEN SUM(DATA_LENGTH)>=1024*1024      THEN LPAD( CONCAT( ROUND( SUM(DATA_LENGTH)/1024/1024     , 2 ), ' MB' ), 10, SPACE(1) )
+           WHEN SUM(DATA_LENGTH)>=1024           THEN LPAD( CONCAT( ROUND( SUM(DATA_LENGTH)/1024          , 2 ), ' KB' ), 10, SPACE(1) )
+           ELSE                                      LPAD( CONCAT( ROUND( SUM(DATA_LENGTH)               , 2 ), '  B' ), 10, SPACE(1) )
+       END AS "DATA SIZE"
+     , CASE 
+           WHEN SUM(INDEX_LENGTH)>=1024*1024*1024 THEN LPAD( CONCAT( ROUND( SUM(INDEX_LENGTH)/1024/1024/1024, 2 ), ' GB' ), 10, SPACE(1) )
+           WHEN SUM(INDEX_LENGTH)>=1024*1024      THEN LPAD( CONCAT( ROUND( SUM(INDEX_LENGTH)/1024/1024     , 2 ), ' MB' ), 10, SPACE(1) )
+           WHEN SUM(INDEX_LENGTH)>=1024           THEN LPAD( CONCAT( ROUND( SUM(INDEX_LENGTH)/1024          , 2 ), ' KB' ), 10, SPACE(1) )
+           ELSE                                       LPAD( CONCAT( ROUND( SUM(INDEX_LENGTH)               , 2 ), '  B' ), 10, SPACE(1) )
+       END AS "INDEX SIZE"
+FROM INFORMATION_SCHEMA.TABLES
+GROUP BY 1,2,3,4,5;

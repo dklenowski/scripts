@@ -1,0 +1,101 @@
+# /etc/mysql/my.cnf - Main MySQL Database Configuration
+# 
+# If you're not the DBA, you probably shouldn't be editing this file.
+# Local configuration overrides go in "local.cnf".
+# DBA configuration overrides go in "dba.cnf".
+
+[safe_mysqld]
+open-files-limit = 32768
+
+[mysqld]
+
+# Directories
+basedir  = /usr/
+datadir  = /var/lib/mysql/data
+tmpdir   = /var/lib/mysql/tmp
+language = /usr/share/mysql/english
+
+# Server Config
+server-id              = <%= @ipaddress.split(".").zip([256**3,256**2,256,1]).inject(0) { |sum, a| sum + a[0].to_i*a[1] } %>
+port                   = 3306
+user                   = mysql
+socket                 = /var/run/mysqld/mysqld.sock
+pid-file               = /var/run/mysqld/mysqld.pid
+userstat_running       = 1
+default-storage-engine = InnoDB
+
+# Disabled Options
+skip-external-locking = 1
+
+# Query Cache
+query_cache_size = 0
+query_cache_type = 0
+
+# Server Memory and Caches
+table_open_cache     = 1024
+thread_cache_size    = 64
+
+# Networking
+max_allowed_packet   = 1G
+max_connections      = 50
+max_user_connections = 25
+
+# Replication
+skip-slave-start    = 1
+master-info-file    = /var/lib/mysql/relay/master.info
+relay-log           = /var/lib/mysql/relay/relay-bin
+relay-log-index     = /var/lib/mysql/relay/relay-bin.index
+relay-log-info-file = /var/lib/mysql/relay/relay-log.info
+slave-net-timeout   = 5
+
+# Binary logging
+binlog-format     = STATEMENT
+expire_logs_days  = 15
+log-bin           = /var/lib/mysql/binary/mysqld-binlog
+log-bin-index     = /var/lib/mysql/binary/mysqld-binlog.index
+log-slave-updates = 1
+sync_binlog       = 1
+
+# Error Logging
+log-warnings = 2
+log-error    = /var/lib/mysql/log/<% fqdn %>_err.log
+
+# Slow Query Logging
+slow-query-log                        = 1
+log-slow-slave-statements             = 1
+log_slow_timestamp_every              = 1
+slow_query_log_microseconds_timestamp = 1
+log_slow_verbosity                    = microtime,query_plan,innodb,profiling
+long-query-time                       = 0.05
+slow-query-log-file                   = /var/lib/mysql/log/<%= @fqdn %>_slow.log
+log-slow-admin-statements             = 1
+log-queries-not-using-indexes         = 1
+
+
+# InnoDB
+innodb_adaptive_flushing        = 1
+innodb_buffer_pool_size         = <%= ( @memorysize_mb.to_f * 0.6 ).to_i %>M
+innodb_data_file_path           = ibdata1:20M:autoextend
+innodb_data_home_dir            = /var/lib/mysql/data
+innodb_additional_mem_pool_size = 20M
+innodb_doublewrite_file         = /var/lib/mysql/journal/ib_doublewrite
+innodb_lazy_drop_table          = 0
+innodb_fast_shutdown            = 1
+innodb_file_per_table           = 1
+innodb_flush_log_at_trx_commit  = 1
+innodb_flush_method             = O_DIRECT
+innodb_io_capacity              = 1500
+innodb_log_group_home_dir       = /var/lib/mysql/journal/
+innodb_max_dirty_pages_pct      = 98
+innodb_open_files               = 1024
+innodb_rollback_on_timeout      = 1
+innodb_status_file              = 1
+innodb_stats_on_metadata        = 0
+innodb_stats_auto_update        = 1
+
+# MyISAM
+key-buffer-size = 20M
+
+# Standard configuration overrides
+!include /etc/mysql/local.cnf
+!include /etc/mysql/dba.cnf

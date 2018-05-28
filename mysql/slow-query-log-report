@@ -1,0 +1,24 @@
+#!/bin/bash
+
+## REQUIRES ROOT. Run with "sudo". Sorry.
+
+# Three Lines for the Site Ops-kings under the sky,
+# Seven for the Development-lords in their halls of carpet,
+# Nine for Human NOCkies doomed to man the night-shift,
+# One for the DBA on his Stellcase Chair
+# In the Shared Team where the Knowledge lie.
+# One Script to rule Slow Queries, One Script to find them,
+# One Script to bring them all and in the slow-query-log bind them
+# In the Shared Team where the Knowledge lie.
+
+HOSTNAME=$(hostname --fqdn)
+DATETIME=$(date +"%Y%m%d%H%M%S")
+
+sudo pt-query-digest --report --limit '100%'                 \
+    $(mysql --defaults-extra-file=/etc/mysql/debian.cnf      \
+            --batch                                          \
+            --skip-column-names                              \
+            --silent                                         \
+            --execute 'SELECT @@global.slow_query_log_file'
+    ) > ${HOSTNAME}-${DATETIME}-slow.report 2>${HOSTNAME}-${DATETIME}-error.log
+

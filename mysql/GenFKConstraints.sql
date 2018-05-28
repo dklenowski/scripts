@@ -1,0 +1,25 @@
+SELECT CONCAT( "ALTER TABLE `", tc.TABLE_SCHEMA, "`.`", tc.TABLE_NAME, "`"
+           , GROUP_CONCAT(
+                   "\n    ADD CONSTRAINT FOREIGN KEY `", tc.CONSTRAINT_NAME
+                 , "` ( ", aux_kcu.COLUMN_LIST, " )"
+                 , "\n    REFERENCES `", kcu.REFERENCED_TABLE_SCHEMA, "`.`", kcu.REFERENCED_TABLE_NAME
+                 , "` ( `", kcu.REFERENCED_COLUMN_NAME, "` )"
+             )
+           , ";\n\n"
+     ) AS "SQL"
+FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
+     JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
+         ON ( kcu.CONSTRAINT_SCHEMA = tc.CONSTRAINT_SCHEMA
+          AND kcu.CONSTRAINT_NAME   = tc.CONSTRAINT_NAME 
+          AND kcu.REFERENCED_COLUMN_NAME IS NOT NULL )
+     JOIN (
+         SELECT kcu1.CONSTRAINT_SCHEMA
+              , kcu1.CONSTRAINT_NAME
+              , GROUP_CONCAT( kcu1.COLUMN_NAME ORDER BY kcu1.ORDINAL_POSITION ) AS "COLUMN_LIST"
+         FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu1
+         GROUP BY kcu1.CONSTRAINT_SCHEMA, kcu1.CONSTRAINT_NAME
+     ) AS aux_kcu
+         ON ( aux_kcu.CONSTRAINT_SCHEMA = tc.CONSTRAINT_SCHEMA
+          AND aux_kcu.CONSTRAINT_NAME   = tc.CONSTRAINT_NAME )
+GROUP BY tc.TABLE_SCHEMA, tc.TABLE_NAME
+
