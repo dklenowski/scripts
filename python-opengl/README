@@ -1,0 +1,10 @@
+This package requires python (>2.5) and pyglet (http://www.pyglet.org/).
+
+If your running this script on a Mac, there is a bug in pyglet with newer
+versions of Snow Leopard 64 bit, i.e.
+  http://code.google.com/p/pyglet/issues/detail?id=438
+
+Therefore you must add the following environment variable (before running any
+of the scripts/unit tests).
+  export VERSIONER_PYTHON_PREFER_32_BIT=yes
+
